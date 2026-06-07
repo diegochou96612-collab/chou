@@ -1,0 +1,457 @@
+:root {
+    --symbol-height: 120px;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #000;
+}
+
+/* 背景容器：填滿整個螢幕 */
+.machine-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: url('拉霸機背景_v3.png') no-repeat center center;
+    background-size: cover;
+    /* 關鍵：填滿螢幕 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 捲軸顯示總區域 */
+.reel-area {
+    position: absolute;
+    top: 29%;
+    /* 往下微調以對齊新背景的內框 */
+    left: 46%;
+    /* 大幅向右移動 配合新背景機台的位置 */
+    width: 38%;
+    /* 縮小總寬度 讓三個軸能剛好塞進新框框裡 */
+    height: 120px;
+    display: flex;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* 每一支捲軸：不再使用 gap，改用絕對定位或靈活比例 */
+.reel-window {
+    position: absolute;
+    top: 0;
+    width: 28%;
+    /* 縮小寬度以避開金屬邊框 */
+    height: 100%;
+    background: transparent;
+    overflow: hidden;
+}
+
+/* 精確微調每一支捲軸的水平位置 (%) */
+.reel-window:nth-child(1) {
+    left: 5%;
+}
+
+.reel-window:nth-child(2) {
+    left: 36%;
+}
+
+.reel-window:nth-child(3) {
+    left: 67%;
+}
+
+.reel-strip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* 第一次旋轉的重置與長動畫由 JS 控制 */
+}
+
+.symbol {
+    height: var(--symbol-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    /* 根據填滿後的螢幕大小調整圖案尺寸 */
+    background: transparent;
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.2));
+}
+
+/* 拉桿熱區：放在右側球體位置 */
+/* 拉桿的整體容器與熱區 */
+.lever-container {
+    position: absolute;
+    top: 300px;
+    right: 30px;
+    width: 80px;
+    height: 350px;
+    cursor: pointer;
+    z-index: 20;
+    /* 關鍵：設定旋轉的圓心在正下方底部 */
+    transform-origin: bottom center;
+    /* 設定動畫的平滑度 */
+    transition: transform 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* 拉桿底座 */
+.lever-base {
+    position: absolute;
+    bottom: 160px;
+    right: 33px;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 60px;
+    background: linear-gradient(to right, #2a2a2a, #666666, #1a1a1a);
+    border-radius: 8px;
+    box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.2), 0 5px 15px rgba(0, 0, 0, 0.8);
+    z-index: 22;
+}
+
+/* 金屬桿身 */
+.lever-stick {
+    position: absolute;
+    bottom: 210px;
+    right: 63px;
+    transform: translateX(-50%);
+    width: 22px;
+    height: 280px;
+    background: linear-gradient(to right, #888, #fff, #555);
+    border-radius: 10px;
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.4);
+    z-index: 21;
+}
+
+/* 頂部的紅色圓球 */
+.lever-ball {
+    position: absolute;
+    bottom: 480px;
+    right: 13px;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 70px;
+    background: radial-gradient(circle at 35% 35%, #ff4d4d, #cc0000, #4d0000);
+    border-radius: 50%;
+    box-shadow: inset -5px -5px 15px rgba(0, 0, 0, 0.5), 5px 10px 20px rgba(0, 0, 0, 0.6);
+    z-index: 23;
+}
+
+/* JavaScript 觸發的壓下動畫 */
+.pull-down {
+    transform: rotateX(65deg);
+}
+
+#balance {
+    position: absolute;
+    left: 10px;
+    top: 25px;
+    size: 20%;
+    height: 18%;
+    z-index: 2;
+}
+
+#balance_text {
+    position: absolute;
+    z-index: 5;
+    /* 確保在圖片的上面 */
+    top: 75px;
+    /* 根據你的圖片位置上下微調 */
+    left: 160px;
+    /* 根據你的圖片位置左右微調 */
+    font-size: 30px;
+    color: white;
+    /* 也可以改成 #FFD700 金色 */
+    font-weight: bold;
+    font-family: monospace;
+    /* 數字用等寬字體比較好看 */
+}
+
+.big {
+    font-size: 30px;
+}
+
+.small {
+    font-size: 20px;
+}
+
+#describe_button {
+    position: absolute;
+    z-index: 50;
+    top: 415px;
+    /* left:10px; */
+    font-size: 20px;
+    color: black;
+    margin: 10px;
+    border-radius: 10px;
+    border: 10px;
+    padding: 10px;
+    cursor: pointer;
+    /* 滑鼠移上去時游標會變成手指圖案 */
+    transition: all 0.2s ease;
+    /* 讓變色和縮小的過程有平滑的動畫感 */
+    font-size: 24px;
+}
+
+#describe_button:hover {
+    background-color: lightgray;
+}
+
+#describe_button:active {
+    transform: scale(0.92);
+    /* 讓按鈕縮小到原本尺寸的 92% 來製造按壓感 */
+}
+
+#describe_text {
+    position: absolute;
+    z-index: 100;
+    text-align: center;
+    /* -- 修改重點開始 -- */
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-height: 80vh;
+    overflow-y: auto;
+    /* 內容太多時，自動出現上下捲軸 */
+    /* -- 修改重點結束 -- */
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    /* 加一點陰影比較好看 */
+}
+
+#probability_text {
+    position: absolute;
+    z-index: 100;
+    text-align: center;
+    /* -- 修改重點開始 -- */
+    top: 10%;
+    left: 50%;
+    transform: translateX(-50%);
+    max-height: 80vh;
+    overflow-y: auto;
+    /* 內容太多時，自動出現上下捲軸 */
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    /* 加一點陰影比較好看 */
+}
+
+#probability_button {
+    position: absolute;
+    z-index: 3;
+    top: 345px;
+    /* left: 10px; */
+    font-size: 20px;
+    color: black;
+    margin: 10px;
+    border-radius: 10px;
+    border: 10px;
+    padding: 10px;
+    cursor: pointer;
+    /* 滑鼠移上去時游標會變成手指圖案 */
+    transition: all 0.2s ease;
+    /* 讓變色和縮小的過程有平滑的動畫感 */
+    font-size: 24px;
+}
+
+#probability_button:hover {
+    background-color: lightgray;
+}
+
+#probability_button:active {
+    transform: scale(0.92);
+    /* 讓按鈕縮小到原本尺寸的 92% 來製造按壓感 */
+}
+
+#one_time_money {
+    position: absolute;
+    height: 11%;
+    top: 170px;
+    left: 10px;
+    z-index: 5;
+}
+
+#one_time_money_input{
+    background: transparent; /* 第一步：把按鈕背景變成透明 */
+    border: none;            /* 第二步：把按鈕的邊框拿掉 */
+    padding: 0;              /* 第三步：把內距歸零，讓圖片完全貼齊邊緣 */
+    cursor: pointer;         /* 讓滑鼠移過去時變成手指圖案 */
+    height: 100%;
+    position: absolute;
+    border: none;
+    z-index: 20;
+    top: -125px;
+    left: 360px;
+}
+
+.one_time_money_input_form{
+    display: none;
+    position: absolute;
+    z-index: 20;
+    color: black;
+    background-color: white;
+    font-size: 24px;
+    padding: 10px;
+    left: 380px;
+    top: 250px;
+}
+
+#input_img{
+    height: 8%;
+    border: none;
+    padding: 0px;
+    margin: 0px;
+}
+
+#one_time_ern{
+    position: absolute;
+    height: 11%;
+    top: 260px;
+    left: 10px;
+    z-index: 5;
+}
+
+.price_text {
+    color: blue;
+}
+
+#one_time_money_text{
+    position: absolute;
+    top: 170px;
+    left: 200px;
+    z-index: 10;
+    color: black;
+    font-size: 24px;
+}
+
+#one_time_ern_text{
+    color: black;
+    position: absolute;
+    z-index: 20;
+    top: 285px;
+    left: 210px;
+    font-size: 24px;
+}
+
+#bet_up_btn {
+    position: absolute;
+    top: 180px;
+    left: 300px;
+    z-index: 10;
+    cursor: pointer;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 18px;
+}
+
+#bet_down_btn {
+    position: absolute;
+    top: 210px;
+    left: 300px;
+    z-index: 10;
+    cursor: pointer;
+    background: transparent;
+    color: white;
+    border: none;
+    font-size: 18px;
+}
+
+/* 替代alert用的 */
+#please_login_first,
+#balance_not_enough,
+#min_should_over_100,
+#balance_not_enough_one_time_money {
+    position: absolute;
+    z-index: 100; /* 確保提示框顯示在最頂層，不被其他圖片擋住 */
+    top: 50px; /* 對齊你第三張圖畫的黑色框框高度（機台正上方區域） */
+    left: 50%; 
+    transform: translateX(-50%); /* 精準的水平置中魔法 */
+    background-color: rgba(0, 0, 0, 0.85); /* 黑色半透明背景框 */
+    color: #ffffff; /* 搭配深色背景，文字改為白色會更清晰 */
+    font-size: 24px; /* 稍微將字體縮小一點，讓整體框框比例更好看 */
+    padding: 15px 35px; /* 上下左右增加內縮空間，撐出一個實體的框框感覺 */
+    border-radius: 8px; /* 增加邊緣圓角，看起來比較現代感 */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6); /* 背後加一點陰影，製造浮動立體感 */
+    display: none; /* 預設隱藏，由 JavaScript 控制顯示 */
+    white-space: nowrap; /* 強制文字在一行內顯示完畢，不要隨便換行 */
+    letter-spacing: 2px; /* 字距稍微拉開，提升質感 */
+    font-weight: bold;
+}
+/* 替代alert用的 - 將四個 ID 合併設定，精簡程式碼並統一風格 */
+
+#auto_run_img{
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    cursor: pointer;
+    height: 11%;
+    z-index: 10;
+    bottom: 110px;
+    right: 200px;
+}
+
+#cancel_auto_run{
+    display: none;
+    position: absolute;
+    background-color: transparent;
+    border: none;
+    padding: 0px;
+    cursor: pointer;
+    height: 11%;
+    z-index: 10;
+    bottom: 110px;
+    right: 200px;
+}
+
+#rank_list_button{
+    position: absolute;
+    z-index: 5;
+    bottom: 115px;
+    left: 10px;
+    font-size: 24px;
+    background-color: white;
+    color: black;
+    cursor: pointer;
+    border-radius: 10px;
+    border-color: transparent;
+    padding: 10px;
+    border: 10px;
+    font-size: 24px;
+}
+
+#rank_list_button:hover {
+    background-color: lightgray;
+}
+
+#rank_list_button:active {
+    transform: scale(0.92);
+    /* 讓按鈕縮小到原本尺寸的 92% 來製造按壓感 */
+}
+
+#ranking_list{
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 100px;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 10px;
+    display: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    font-size: 24px;
+    border: 10px;
+}

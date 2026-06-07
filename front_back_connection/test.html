@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test</title>
+    <style>
+        #animation_test{
+            display: none;
+            position: absolute;
+            right: 50%;
+            top: 50%;
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- 原本是display:none;  然後我要按一個按鈕跳出來動畫 -->
+    <p id="animation_test">你好</p>
+    <button id="test_button" onclick="show_animation()">test_button</button>
+</body>
+<script>
+    function show_animation(){
+        document.getElementById("animation_test").style.display = "block"
+    }
+
+</script>
+</html>

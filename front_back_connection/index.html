@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <title>拉霸機</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <img src="balance_v3.png" id="balance">
+    <span id="balance_text">載入中...</span>
+    <img src="單次下注金額_v3.png" id="one_time_money">
+
+    <!-- 替代alert用的 -->
+    <p id="please_login_first">請先登入</p>
+    <p id="balance_not_enough">餘額不足</p>
+    <p id="min_should_over_100">最低下注金額為 100 元！</p>
+    <p id="balance_not_enough_one_time_money">餘額不足  無法再提高下注金額！</p>
+    <!-- 替代alert用的 -->
+
+    <button id="one_time_money_input"><img src="輸入.png" id="input_img" 
+        onclick="one_time_money_input_text_function()"></button>
+
+    <div id="one_time_money_input_typing" class="one_time_money_input_form">
+        <label for="one_time_money_input_text">請輸入金額</label>
+        <br>
+        <input id="one_time_money_input_text" type="text">
+        <br>
+        <button onclick="confirm_one_time_money_input_text()">確認</button>
+        <button onclick="cancel_one_time_money_input_text()">取消</button>
+    </div>
+
+    <img src="單次賺的錢_v2.png" id="one_time_ern">
+    <span id="one_time_ern_text">0</span>
+
+    <img src="自動_v2.png" id="auto_run_img" onclick="auto_run()">
+    <img src="自動(打勾).png" id="cancel_auto_run" onclick="cancel_auto_run()">
+
+    <button type="button" onclick="describe_show()" id="describe_button">遊戲說明</button>
+
+    <nav id="describe_text">
+        <h1 class="big" style="margin-top: 0;">【基本規則】</h1>
+        <p>每次拉霸需要投入 100 元。<br>
+            本機台擁有獨特的「散件疊加」機制，只要圖案出現在轉盤上，無論是否有連線，<br>
+            都會給予獎金。獎金會依照出現的次數自動疊加計算。</p>
+
+        <h2 class="big">【獎金表】</h2>
+
+        <h3 class="small" style="margin-bottom: 5px;">🍏 蘋果、香蕉、跑車、金幣</h3>
+        出現 1 個：獲得 <span id="desc_win1_low" class="price_text">載入中...</span> 元<br>
+        出現 2 個：獲得 <span id="desc_win2_low" class="price_text">載入中...</span> 元<br>
+        出現 3 個：獲得 <span id="desc_jakapot_low" class="price_text">載入中...</span> 元<br>
+
+        <h4 class="small" style="margin-bottom: 5px;">🦄 獨角獸、城堡、直升機、氣球</h4>
+        出現 1 個：獲得 <span id="desc_win1_mid" class="price_text">載入中...</span> 元<br>
+        出現 2 個：獲得 <span id="desc_win2_mid" class="price_text">載入中...</span> 元<br>
+        出現 3 個：獲得 <span id="desc_jakapot_mid" class="price_text">載入中...</span> 元<br>
+
+        <h5 class="small" style="margin-bottom: 5px;">✨ 嘉年華、星星</h5>
+        出現 1 個：獲得 <span id="desc_win1_high" class="price_text">載入中...</span> 元<br>
+        出現 2 個：獲得 <span id="desc_win2_high" class="price_text">載入中...</span> 元<br>
+        出現 3 個：獲得 <span id="desc_jakapot_high" class="price_text">載入中...</span> 元<br>
+    </nav>
+
+    <button id="probability_button" type="button" onclick="probability_show()">獎池內容說明</button>
+
+    <nav id="probability_text">
+        <h1 style="margin-top: 0;">【獎池機率與賠率表】</h1>
+        單軸共 34 籤 機率與對應獎金如下:<br>
+
+        <h2>常見圖案 (數量 5 單軸機率 14.71%)</h2>
+        包含：蘋果 香蕉 跑車 金幣<br>
+        1個給 <span id="prob_win1_low" class="price_text">載入中...</span> 元 |
+        2個給 <span id="prob_win2_low" class="price_text">載入中...</span> 元 |
+        3個給 <span id="prob_jakapot_low" class="price_text">載入中...</span> 元<br>
+
+        <h3>稀有圖案 (數量 3 單軸機率 8.82%)</h3>
+        包含：獨角獸 城堡 直升機 氣球<br>
+        1個給 <span id="prob_win1_mid" class="price_text">載入中...</span> 元 |
+        2個給 <span id="prob_win2_mid" class="price_text">載入中...</span> 元 |
+        3個給 <span id="prob_jakapot_mid" class="price_text">載入中...</span> 元<br>
+
+        <h4>傳說大獎 (數量 1 單軸機率 2.94%)</h4>
+        包含：嘉年華 星星<br>
+        1個給 <span id="prob_win1_high" class="price_text">載入中...</span> 元 |
+        2個給 <span id="prob_win2_high" class="price_text">載入中...</span> 元 |
+        3個給 <span id="prob_jakapot_high" class="price_text">載入中...</span> 元
+    </nav>
+
+    <!-- 排行榜 -->
+    <button type="button" onclick="show_rank_list()" id="rank_list_button">顯示排名</button>
+
+    <table id="ranking_list" border="1">
+        <thead>
+            <tr>
+                <th>排名</th>
+                <th>名稱</th>
+                <th>盈餘</th>
+                <th>剩餘金額</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <th>1</th>
+                <th id="first_person_name">N/A</th>
+                <th id="first_person_ern">N/A</th>
+                <th id="first_person_balance">N/A</th>
+            </tr>
+            <tr>
+                <th>2</th>
+                <th id="second_person_name">N/A</th>
+                <th id="second_person_ern">N/A</th>
+                <th id="second_person_balance">N/A</th>
+            </tr>
+
+            <tr>
+                <th>3</th>
+                <th id="third_person_name">N/A</th>
+                <th id="third_person_ern">N/A</th>
+                <th id="third_person_balance">N/A</th>
+            </tr>
+
+            <tr>
+                <th>4</th>
+                <th id="fourth_person_name">N/A</th>
+                <th id="fourth_person_ern">N/A</th>
+                <th id="fourth_person_balance">N/A</th>
+            </tr>
+
+            <tr>
+                <th>5</th>
+                <th id="fifth_person_name">N/A</th>
+                <th id="fifth_person_ern">N/A</th>
+                <th id="fifth_person_balance">N/A</th>
+            </tr>
+        </tbody>
+    </table>
+
+    <p id="one_time_money_text">100</p>
+    <button id="bet_up_btn" onclick="changeBet(100)">▲</button>
+    <button id="bet_down_btn" onclick="changeBet(-100)">▼</button>
+
+    <div class="machine-container">
+        <div class="reel-area">
+            <div class="reel-window">
+                <div class="reel-strip" id="reel0"></div>
+            </div>
+            <div class="reel-window">
+                <div class="reel-strip" id="reel1"></div>
+            </div>
+            <div class="reel-window">
+                <div class="reel-strip" id="reel2"></div>
+            </div>
+        </div>
+        <div class="lever-container" onclick="startSpin()">
+            <div class="lever-base"></div>
+            <div class="lever-stick"></div>
+            <div class="lever-ball"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

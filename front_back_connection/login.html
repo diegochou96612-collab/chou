@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <title>拉霸機 - 登入系統</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            /* 深藍色背景呼應拉霸機 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: '微軟正黑體', sans-serif;
+        }
+
+        .login-container {
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+            border: 2px solid #ffd700;
+            /* 奢華金邊 */
+            border-radius: 15px;
+            padding: 40px;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.2), inset 0 0 10px rgba(255, 215, 0, 0.1);
+            text-align: center;
+        }
+
+        h2 {
+            color: #ffd700;
+            margin-top: 0;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 3px black;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            color: #ffffff;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 16px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to bottom, #ffd700, #b8860b);
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            margin-top: 10px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .toggle-text {
+            margin-top: 20px;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .toggle-text span {
+            color: #ffd700;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container" id="login-form">
+        <h2>進入遊樂場</h2>
+        <div class="input-group">
+            <label>帳號</label>
+            <input type="text" id="login_account" placeholder="請輸入帳號">
+        </div>
+        <div class="input-group">
+            <label>密碼</label>
+            <input type="password" id="login_password" placeholder="請輸入密碼">
+        </div>
+        <button class="action-btn" onclick="login()">登入</button>
+        
+        <div id="login_error_msg" style="color: #ff4d4d; margin-top: 15px; font-size: 15px; display: none; font-weight: bold;"></div>
+        
+        <div class="toggle-text">
+            還沒有帳號嗎 <span onclick="toggleView('register')">點此註冊</span>
+        </div>
+    </div>
+
+    <div class="login-container" id="register-form" style="display: none;">
+        <h2>註冊新玩家</h2>
+        <div class="input-group">
+            <label>玩家名稱</label>
+            <input type="text" id="reg_name" placeholder="請輸入顯示名稱">
+        </div>
+        <div class="input-group">
+            <label>帳號</label>
+            <input type="text" id="reg_account" placeholder="請設定帳號">
+        </div>
+        <div class="input-group">
+            <label>密碼</label>
+            <input type="password" id="reg_password" placeholder="請設定密碼">
+        </div>
+        <button class="action-btn" onclick="register()">註冊</button>
+        
+        <div id="reg_error_msg" style="color: #ff4d4d; margin-top: 15px; font-size: 15px; display: none; font-weight: bold;"></div>
+
+        <div class="toggle-text">
+            已經有帳號了 <span onclick="toggleView('login')">返回登入</span>
+        </div>
+    </div>
+
+    <script>
+        function toggleView(view) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            // 切換畫面時，清空殘留的錯誤訊息
+            document.getElementById('login_error_msg').style.display = 'none';
+            document.getElementById('reg_error_msg').style.display = 'none';
+
+            if (view === 'register') {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            } else {
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            }
+        }
+
+        async function login() {
+            const accountInput = document.getElementById('login_account').value;
+            const passwordInput = document.getElementById('login_password').value;
+            const errorMsg = document.getElementById('login_error_msg');
+
+            if (!accountInput || !passwordInput) {
+                errorMsg.innerText = "請完整輸入帳號和密碼！";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ account: accountInput, password: passwordInput })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    sessionStorage.setItem('playerName', data.player.玩家名稱);
+                    sessionStorage.setItem('playerID', data.player.玩家ID);
+                    window.location.href = '/index.html'; // 登入成功直接跳轉，不跳通知
+                } else {
+                    errorMsg.innerText = data.error;
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error("連線錯誤:", err);
+                errorMsg.innerText = "伺服器連線異常，請稍後再試。";
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        async function register() {
+            const nameInput = document.getElementById('reg_name').value;
+            const accountInput = document.getElementById('reg_account').value;
+            const passwordInput = document.getElementById('reg_password').value;
+            const errorMsg = document.getElementById('reg_error_msg');
+
+            if (!nameInput || !accountInput || !passwordInput) {
+                errorMsg.innerText = "請完整填寫玩家名稱、帳號和密碼！";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: nameInput, account: accountInput, password: passwordInput })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    errorMsg.style.color = '#4caf50'; 
+                    errorMsg.innerText = "註冊成功！請重新登入。";
+                    errorMsg.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        toggleView('login');
+                        errorMsg.style.color = '#ff4d4d'; 
+                    }, 1200);
+                } else {
+                    errorMsg.innerText = data.error;
+                    errorMsg.style.display = 'block';
+                }
+            } catch (err) {
+                console.error("連線錯誤:", err);
+                errorMsg.innerText = "伺服器連線異常，請稍後再試。";
+                errorMsg.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+
+</html>
